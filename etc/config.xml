@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+    <default>
+        <pwa>
+            <default_order_address>
+                <country_id>US</country_id>
+                <region_id>1</region_id>
+                <city>Gardena</city>
+                <postcode>90274</postcode>
+                <telephone>123456789</telephone>
+                <street_line1>Redondo Beach</street_line1>
+            </default_order_address>
+            <search_product>
+                <pwa_search_product>id,type_id,name,sku</pwa_search_product>
+            </search_product>
+            <brand_name>
+                <pwa_brand_active>Connectpos</pwa_brand_active>
+            </brand_name>
+            <banner>
+                <pwa_banner_active>5</pwa_banner_active>
+            </banner>
+            <integrate>
+                <pwa_integrate_reward_points>no</pwa_integrate_reward_points>
+                <pwa_integrate_gift_card>no</pwa_integrate_gift_card>
+            </integrate>
+            <color_picker>
+                <pwa_theme_color>#2db9b0</pwa_theme_color>
+            </color_picker>
+            <product_category>
+                <pwa_show_product_visibility>1,2,3,4</pwa_show_product_visibility>
+            </product_category>
+        </pwa>
+    </default>
+</config>

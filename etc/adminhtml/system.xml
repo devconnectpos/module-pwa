@@ -1,0 +1,130 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="pwa" translate="label" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
+            <class>separator-top</class>
+            <label>PWA</label>
+            <tab>xretail</tab>
+            <resource>SM_XRetail::pos_configuration</resource>
+            <!-- Logo -->
+            <group id="logo" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1" >
+                <label>Logo</label>
+                <field id="pwa_logo" translate="label" type="image" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1" >
+                    <label>Upload PWA Logo</label>
+                    <backend_model>SM\XRetail\Config\Model\Backend\Image</backend_model>
+                    <base_url type="media" scope_info="1">pwa_logo</base_url>
+                    <upload_dir config="pwa_logo" scope_info="1">pwa_logo</upload_dir>
+                </field>
+            </group>
+
+            <!--Brand -->
+            <group id="brand_name" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1" >
+                <label>Brand</label>
+                <field id="pwa_brand_active" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Brand Name</label>
+                    <validate>required-entry</validate>
+                </field>
+            </group>
+
+            <!-- Integrate -->
+            <group id="integrate" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Integrate</label>
+                <field id="pwa_integrate_reward_points" translate="label" type="select" sortOrder="31" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Reward Points</label>
+                    <source_model>SM\XRetail\Config\Model\RadioRewardPoints</source_model>
+                </field>
+                <field id="pwa_integrate_gift_card" translate="label" type="select" sortOrder="31" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Gift Card</label>
+                    <source_model>SM\XRetail\Config\Model\RadioGiftCart</source_model>
+                </field>
+            </group>
+
+            <!-- Banner -->
+            <group id="banner" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1"
+                   showInStore="1">
+                <label>Banner</label>
+                <field id="pwa_banner_active" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Number of Active Banners</label>
+                    <validate>required-entry validate-number validate-not-negative-number digits-range-0-100 </validate>
+                </field>
+            </group>
+
+            <!-- Product & Category -->
+            <group id="product_category" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Product And Category</label>
+                <field id="pwa_show_product_visibility" translate="label" type="multiselect" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Show product visibility</label>
+                    <source_model>SM\XRetail\Config\Model\ShowProductVisibility</source_model>
+                </field>
+                <field id="pwa_show_disable_categories" translate="label" type="select" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Show disabled categories</label>
+                    <source_model>SM\XRetail\Config\Model\ShowDisabledCategories</source_model>
+                </field>
+                <field id="pwa_show_disable_products" translate="label" type="select" sortOrder="3" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>Show disable products</label>
+                    <source_model>SM\XRetail\Config\Model\ShowDisabledProducts</source_model>
+                </field>
+                <field id="pwa_show_out_of_stock_products" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
+                    <label>Show out of stock products</label>
+                    <source_model>SM\XRetail\Config\Model\ShowOutOfStockProducts</source_model>
+                </field>
+            </group>
+
+            <!-- Search Product -->
+            <group id="search_product" translate="label" type="text" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Search Product</label>
+                <field id="pwa_search_product" translate="label" type="multiselect" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Select attribute product</label>
+                    <source_model>SM\XRetail\Config\Model\getAllAttributeProduct</source_model>
+                </field>
+            </group>
+
+            <!-- Color picker -->
+            <group id="color_picker" translate="label" type="text" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Theme</label>
+                <field id="pwa_theme_color" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Theme Color</label>
+                    <comment><![CDATA[Adjust color of PWA to your Product And Categoryliking]]></comment>
+                    <frontend_model>SM\PWA\Block\Color</frontend_model> <!-- Our block for attaching color picker to text box -->
+                </field>
+            </group>
+
+            <!-- Default order address -->
+            <group id="default_order_address" translate="label" type="text" sortOrder="8" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Default Order Address</label>
+                <field id="company" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Company</label>
+                </field>
+                <field id="telephone" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Phone Number</label>
+                </field>
+                <field id="country_id" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Country</label>
+                    <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
+                    <frontend_class>countries</frontend_class>
+                    <validate>required-entry validate-select validate-no-empty</validate>
+                    <can_be_empty>1</can_be_empty>
+                </field>
+                <field id="region_id" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Region/State</label>
+                    <validate>validate-state</validate>
+                </field>
+                <field id="postcode" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>ZIP/Postal Code</label>
+                </field>
+                <field id="city" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>City</label>
+                </field>
+                <field id="street_line1" translate="label" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Street Address</label>
+                </field>
+                <field id="street_line2" translate="label" type="text" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Street Address Line 2</label>
+                </field>
+            </group>
+
+        </section>
+    </system>
+</config>
