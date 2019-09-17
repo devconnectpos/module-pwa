@@ -226,7 +226,9 @@ class OrderManagement extends ServiceAbstract {
                     $totals['reward_points_refund_amount'] = $order->getData('aw_reward_points_refund');
                 }
 
-                if ($this->integrateHelperData->isIntegrateGC() && $this->integrateHelperData->isAHWGiftCardxist()) {
+                if (($this->integrateHelperData->isIntegrateGC() ||
+                     ($this->integrateHelperData->isIntegrateGCInPWA() && $order->getData('is_pwa') === '1')) &&
+                     $this->integrateHelperData->isAHWGiftCardxist()) {
                     $orderGiftCards = [];
                     if($order->getExtensionAttributes()){
                         $orderGiftCards = $order->getExtensionAttributes()->getAwGiftcardCodes();
@@ -237,7 +239,6 @@ class OrderManagement extends ServiceAbstract {
                             array_push(
                                 $totals['gift_card'],
                                 [
-                                    //'gift_card_code'   => $giftcard->getGiftcardCode(),
                                     'gift_code'   => $giftcard->getGiftcardCode(),
                                     'giftcard_amount' => floatval(abs($giftcard->getGiftcardAmount())),
                                     'base_giftcard_amount' => floatval(abs($giftcard->getBaseGiftcardAmount()))
