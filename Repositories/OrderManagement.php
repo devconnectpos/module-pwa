@@ -233,7 +233,7 @@ class OrderManagement extends ServiceAbstract {
                     if($order->getExtensionAttributes()){
                         $orderGiftCards = $order->getExtensionAttributes()->getAwGiftcardCodes();
                     }
-                    if (count($orderGiftCards) > 0) {
+                    if (is_array($orderGiftCards) && count($orderGiftCards) > 0) {
                         $totals['gift_card'] = [];
                         foreach ($orderGiftCards as $giftcard) {
                             array_push(
@@ -254,7 +254,7 @@ class OrderManagement extends ServiceAbstract {
                     if($order->getData('gift_cards')){
                         $orderGiftCards = unserialize($order->getData('gift_cards'));
                     }
-                    if (count($orderGiftCards) > 0) {
+                    if (is_array($orderGiftCards) && count($orderGiftCards) > 0) {
                         $totals['gift_card'] = [];
                         foreach ($orderGiftCards as $giftCard) {
                             array_push(
