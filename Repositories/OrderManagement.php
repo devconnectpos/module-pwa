@@ -8,12 +8,8 @@ use SM\Core\Api\Data\XOrder;
 use SM\XRetail\Helper\DataConfig;
 use SM\XRetail\Repositories\Contract\ServiceAbstract;
 
-/**
- * Class OrderHistoryManagement
- *
- * @package SM\PWA\Repositories
- */
-class OrderManagement extends ServiceAbstract {
+class OrderManagement extends ServiceAbstract
+{
 
     /**
      * @var \Magento\Sales\Model\ResourceModel\Order\CollectionFactory
@@ -95,27 +91,34 @@ class OrderManagement extends ServiceAbstract {
         $this->quoteRepository             = $quoteRepository;
         $this->orderFactory                = $orderFactory;
         parent::__construct($requestInterface, $dataConfig, $storeManager);
-
     }
 
-    public function getOrderPWA() {
+    public function getOrderPWA()
+    {
         $searchCriteria = $this->getSearchCriteria();
 
         if ($searchCriteria->getData('getErrorOrder') && intval($searchCriteria->getData('getErrorOrder')) === 1) {
             return $this->loadOrderError($searchCriteria);
-        }
-        else {
+        } else {
             return $this->loadOrders($searchCriteria);
         }
     }
 
-    public function loadOrders(DataObject $searchCriteria) {
+    /**
+     * @param \Magento\Framework\DataObject $searchCriteria
+     *
+     * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \ReflectionException
+     * @throws \Exception
+     */
+    public function loadOrders(DataObject $searchCriteria)
+    {
         $collection = $this->getOrderCollection($searchCriteria);
 
         $orders = [];
         if (1 < $searchCriteria->getData('currentPage')) {
-        }
-        else {
+        } else {
             $storeId = $searchCriteria->getData('storeId');
 
             /** @var \Magento\Sales\Model\Order $order */
@@ -130,8 +133,7 @@ class OrderManagement extends ServiceAbstract {
                     $customer = $this->customerFactory->create()->load($order->getCustomerId());
                     if ($customer->getData('retail_telephone')) {
                         $customerPhone = $customer->getData('retail_telephone');
-                    }
-                    else {
+                    } else {
                         $customerPhone = "";
                     }
                 }
@@ -142,7 +144,8 @@ class OrderManagement extends ServiceAbstract {
                         'name'  => $order->getCustomerName(),
                         'email' => $order->getCustomerEmail(),
                         'phone' => $customerPhone,
-                    ]);
+                    ]
+                );
 
                 $xOrder->setData('items', $this->getOrderItemData($order->getItemsCollection()->getItems()));
 
@@ -158,8 +161,7 @@ class OrderManagement extends ServiceAbstract {
                     if (!$order->hasCreditmemos()) {
                         if ($order->canInvoice()) {
                             $xOrder->setData('retail_status', \SM\Sales\Repositories\OrderManagement::RETAIL_ORDER_PARTIALLY_PAID_AWAIT_PICKING);
-                        }
-                        else if ($order->canShip()) {
+                        } elseif ($order->canShip()) {
                             $xOrder->setData('retail_status', \SM\Sales\Repositories\OrderManagement::RETAIL_ORDER_COMPLETE_AWAIT_PICKING);
                         }
                     } else {
@@ -179,11 +181,11 @@ class OrderManagement extends ServiceAbstract {
                             $paymentData,
                             function ($val) {
                                 return is_array($val);
-                            });
+                            }
+                        );
                         $xOrder->setData('payment', $paymentData);
                     }
-                }
-                else {
+                } else {
                     $xOrder->setData(
                         'payment',
                         [
@@ -192,7 +194,8 @@ class OrderManagement extends ServiceAbstract {
                                 'amount'     => $order->getTotalPaid(),
                                 'created_at' => $order->getCreatedAt()
                             ]
-                        ]);
+                        ]
+                    );
                 }
 
                 $xOrder->setData('can_creditmemo', $order->canCreditmemo());
@@ -230,7 +233,7 @@ class OrderManagement extends ServiceAbstract {
                      ($this->integrateHelperData->isIntegrateGCInPWA() && $order->getData('is_pwa') === '1')) &&
                      $this->integrateHelperData->isAHWGiftCardxist()) {
                     $orderGiftCards = [];
-                    if($order->getExtensionAttributes()){
+                    if ($order->getExtensionAttributes()) {
                         $orderGiftCards = $order->getExtensionAttributes()->getAwGiftcardCodes();
                     }
                     if (is_array($orderGiftCards) && count($orderGiftCards) > 0) {
@@ -251,7 +254,7 @@ class OrderManagement extends ServiceAbstract {
                 }
                 if ($this->integrateHelperData->isIntegrateGC() && $this->integrateHelperData->isGiftCardMagento2EE()) {
                     $orderGiftCards = [];
-                    if($order->getData('gift_cards')){
+                    if ($order->getData('gift_cards')) {
                         $orderGiftCards = unserialize($order->getData('gift_cards'));
                     }
                     if (is_array($orderGiftCards) && count($orderGiftCards) > 0) {
@@ -292,7 +295,8 @@ class OrderManagement extends ServiceAbstract {
      * @return \Magento\Sales\Model\ResourceModel\Order\Collection
      * @throws \Exception
      */
-    protected function getOrderCollection(DataObject $searchCriteria) {
+    protected function getOrderCollection(DataObject $searchCriteria)
+    {
 
         /** @var  \Magento\Sales\Model\ResourceModel\Order\Collection $collection */
         $collection = $this->orderCollectionFactory->create();
@@ -307,17 +311,17 @@ class OrderManagement extends ServiceAbstract {
         // $collection->addFieldToFilter('status', ["neq" => 'complete']);
 
         if ($customerId = $searchCriteria->getData('customerId')) {
-            if($customerId === 'guest' && $searchCriteria->getData('orderId')){
+            if ($customerId === 'guest' && $searchCriteria->getData('orderId')) {
                 $collection->addFieldToFilter('entity_id', ["in" => explode(',', $searchCriteria->getData('orderId'))]);
-            }else{
-            $collection->getSelect()
+            } else {
+                $collection->getSelect()
                 ->where('customer_id = ?', $customerId);
             }
         }
 
         if ($is_pwa = $searchCriteria->getData('is_pwa')) {
             $collection->getSelect()
-                ->where('is_pwa = ?', ($is_pwa)?1:0);
+                ->where('is_pwa = ?', ($is_pwa) ? 1 : 0);
         }
 
         if ($storeId = $searchCriteria->getData('storeId')) {
@@ -328,13 +332,13 @@ class OrderManagement extends ServiceAbstract {
         return $collection;
     }
 
-    public function loadOrderError(DataObject $searchCriteria) {
+    public function loadOrderError(DataObject $searchCriteria)
+    {
         $collection = $this->getOrderErrorCollection($searchCriteria);
 
         $orders = [];
         if (1 < $searchCriteria->getData('currentPage')) {
-        }
-        else {
+        } else {
             foreach ($collection as $order) {
                 $orderData = json_decode($order['order_offline'], true);
                 if (is_array($orderData)) {
@@ -352,7 +356,8 @@ class OrderManagement extends ServiceAbstract {
             ->getOutput();
     }
 
-    protected function getOrderErrorCollection(DataObject $searchCriteria) {
+    protected function getOrderErrorCollection(DataObject $searchCriteria)
+    {
         $collection = $this->orderErrorCollectionFactory->create();
         $storeId    = $searchCriteria->getData('storeId');
         if (is_null($storeId)) {
@@ -373,22 +378,31 @@ class OrderManagement extends ServiceAbstract {
         return $collection;
     }
 
-    public function getOrderItemData($items) {
+    /**
+     * @param $items
+     *
+     * @return array
+     * @throws \ReflectionException
+     */
+    public function getOrderItemData($items)
+    {
         $itemData = [];
         /** @var \Magento\Sales\Model\Order\Item $item */
         foreach ($items as $item) {
-            if ($item->getParentItem())
+            if ($item->getParentItem()) {
                 continue;
+            }
 
             $_item = new XOrder\XOrderItem($item->getData());
             $_item->setData('isChildrenCalculated', $item->isChildrenCalculated());
             if (!$item->getProduct() || is_null($item->getProduct()->getImage())
                 || $item->getProduct()->getImage() == 'no_selection'
                 || !$item->getProduct()->getImage()
-            )
+            ) {
                 $_item->setData('origin_image', null);
-            else
+            } else {
                 $_item->setData('origin_image', $this->productMediaConfig->getMediaUrl($item->getProduct()->getImage()));
+            }
 
             $children = [];
             if ($item->getChildrenItems() && $item->getProductType() == 'bundle') {
@@ -397,15 +411,14 @@ class OrderManagement extends ServiceAbstract {
                     if (is_null($childrenItem->getProduct()->getImage())
                         || $childrenItem->getProduct()->getImage() == 'no_selection'
                         || !$childrenItem->getProduct()->getImage()
-                    )
+                    ) {
                         $_child->setData('origin_image', null);
-                    else
+                    } else {
                         $_child->setData('origin_image', $this->productMediaConfig->getMediaUrl($childrenItem->getProduct()->getImage()));
+                    }
                     $children[] = $_child->getOutput();
                 }
-            }
-            else {
-
+            } else {
             }
 
             $_item->setData('children', $children);
@@ -416,5 +429,4 @@ class OrderManagement extends ServiceAbstract {
 
         return $itemData;
     }
-
 }
