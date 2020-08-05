@@ -319,10 +319,10 @@ class OrderManagement extends ServiceAbstract
             }
         }
 
-        if ($is_pwa = $searchCriteria->getData('is_pwa')) {
-            $collection->getSelect()
-                ->where('is_pwa = ?', ($is_pwa) ? 1 : 0);
-        }
+        // if ($is_pwa = $searchCriteria->getData('is_pwa')) {
+        //     $collection->getSelect()
+        //         ->where('is_pwa = ?', ($is_pwa) ? 1 : 0);
+        // }
 
         if ($storeId = $searchCriteria->getData('storeId')) {
             $collection->getSelect()
