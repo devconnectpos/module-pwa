@@ -415,7 +415,8 @@ class UserManagement extends ServiceAbstract
             $xCustomer->setData('subscription', false);
         }
 
-        if ($this->integrateHelper->isIntegrateRP() && $this->integrateHelper->isAHWRewardPoints()) {
+        $thirdPartyRP = $this->integrateHelper->isAHWRewardPoints() || $this->integrateHelper->isAmastyRewardPoints();
+        if ($this->integrateHelper->isIntegrateRP() && $thirdPartyRP) {
             $xCustomer->setData(
                 'reward_point',
                 $this->integrateHelper->getRpIntegrateManagement()
