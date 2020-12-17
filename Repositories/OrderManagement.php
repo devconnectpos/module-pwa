@@ -211,7 +211,7 @@ class OrderManagement extends ServiceAbstract
                     'tax'                          => floatval($order->getTaxAmount()),
                     'discount'                     => floatval($order->getDiscountAmount()),
                     'coupon_code'                  => $order->getData('coupon_code'),
-                    'retail_discount_pert_item'    => floatval($order->getData('discount_per_item')),
+                    'retail_discount_per_item'    => floatval($order->getData('discount_per_item')),
                     'grand_total'                  => floatval($order->getGrandTotal()),
                     'total_paid'                   => floatval($order->getTotalPaid()),
                     'total_refunded'               => floatval($order->getTotalRefunded()),
