@@ -11,6 +11,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Setup\UpgradeSchemaInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\SchemaSetupInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * @codeCoverageIgnore
@@ -44,10 +45,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
         try {
             $this->state->emulateAreaCode(
                 Area::AREA_FRONTEND, function (SchemaSetupInterface $setup, ModuleContextInterface $context) {
-                $installer = $setup;
-                $installer->startSetup();
                 if (version_compare($context->getVersion(), '0.0.2', '<')) {
-                    $this->addPwaDataToOrder($setup, $context);
+                    $this->addPwaDataToOrder($setup);
                 }
                 if (version_compare($context->getVersion(), '0.0.6', '<')) {
                     $this->dummySetting($setup);
@@ -55,16 +54,32 @@ class UpgradeSchema implements UpgradeSchemaInterface
             }, [$setup, $context]
             );
         } catch (\Throwable $e) {
-            $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/connectpos.log');
+            $writer = new \Zend\Log\Writer\Stream(BP.'/var/log/connectpos.log');
             $logger = new \Zend\Log\Logger();
             $logger->addWriter($writer);
             $logger->info('====> Failed to upgrade PWA schema');
-            $logger->info($e->getMessage() . "\n" . $e->getTraceAsString());
+            $logger->info($e->getMessage()."\n".$e->getTraceAsString());
         }
     }
 
+    /**
+     * @param SchemaSetupInterface $setup
+     * @param OutputInterface      $output
+     */
+    public function execute(SchemaSetupInterface $setup, OutputInterface $output)
+    {
+        $output->writeln('  |__ Initialize PWA configuration data');
+        $this->dummySetting($setup);
+        $output->writeln('  |__ Add PWA data column to quote, sales_order and sales_order_grid tables');
+        $this->addPwaDataToOrder($setup);
+    }
+
+    /**
+     * @param SchemaSetupInterface $setup
+     */
     protected function dummySetting(SchemaSetupInterface $setup)
     {
+        $setup->startSetup();
         $configData = $setup->getTable('core_config_data');
         $data = [
             [
@@ -126,47 +141,38 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 'value'    => "#2db9b0",
                 'scope'    => "default",
                 'scope_id' => 0,
-            ]];
-        foreach ($data as $data) {
-            $setup->getConnection()->insertOnDuplicate($configData, $data, ['value']);
+            ],
+        ];
+
+        foreach ($data as $datum) {
+            $setup->getConnection()->insertOnDuplicate($configData, $datum, ['value']);
         }
+
+        $setup->endSetup();
     }
 
-    protected function addPwaDataToOrder(SchemaSetupInterface $setup, ModuleContextInterface $context)
+    /**
+     * @param SchemaSetupInterface $setup
+     */
+    protected function addPwaDataToOrder(SchemaSetupInterface $setup)
     {
-        $installer = $setup;
+        $setup->startSetup();
+        $tableNames = ['quote', 'sales_order', 'sales_order_grid'];
 
-        $installer->getConnection()->dropColumn($installer->getTable('quote'), 'is_pwa');
-        $installer->getConnection()->dropColumn($installer->getTable('sales_order'), 'is_pwa');
-        $installer->getConnection()->dropColumn($installer->getTable('sales_order_grid'), 'is_pwa');
+        foreach ($tableNames as $tableName) {
+            if (!$setup->getConnection()->tableColumnExists($setup->getTable($tableName), 'is_pwa')) {
+                $setup->getConnection()->addColumn(
+                    $setup->getTable($tableName),
+                    'is_pwa',
+                    [
+                        'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                        'default' => '0',
+                        'comment' => 'Is enable PWA',
+                    ]
+                );
+            }
+        }
 
-        $installer->getConnection()->addColumn(
-            $installer->getTable('quote'),
-            'is_pwa',
-            [
-                'type'    => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
-                'default' => '0',
-                'comment' => 'Is enable PWA',
-            ]
-        );
-        $installer->getConnection()->addColumn(
-            $installer->getTable('sales_order'),
-            'is_pwa',
-            [
-                'type'    => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
-                'default' => '0',
-                'comment' => 'Is enable PWA',
-            ]
-        );
-        $installer->getConnection()->addColumn(
-            $installer->getTable('sales_order_grid'),
-            'is_pwa',
-            [
-                'type'    => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
-                'default' => '0',
-                'comment' => 'Is enable PWA',
-            ]
-        );
         $setup->endSetup();
     }
 }
