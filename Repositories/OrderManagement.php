@@ -5,6 +5,7 @@ namespace SM\PWA\Repositories;
 use Magento\Framework\DataObject;
 use SM\Core\Api\Data\CustomerAddress;
 use SM\Core\Api\Data\XOrder;
+use SM\Shipping\Model\Carrier\RetailStorePickUp;
 use SM\XRetail\Helper\DataConfig;
 use SM\XRetail\Repositories\Contract\ServiceAbstract;
 
@@ -81,15 +82,15 @@ class OrderManagement extends ServiceAbstract
         \Magento\Quote\Api\CartRepositoryInterface $quoteRepository,
         \Magento\Sales\Model\OrderFactory $orderFactory
     ) {
-        $this->productMediaConfig          = $productMediaConfig;
-        $this->customerHelper              = $customerHelper;
-        $this->orderCollectionFactory      = $collectionFactory;
-        $this->integrateHelperData         = $integrateHelperData;
-        $this->customerFactory             = $customerFactory;
-        $this->retailHelper                = $retailHelper;
+        $this->productMediaConfig = $productMediaConfig;
+        $this->customerHelper = $customerHelper;
+        $this->orderCollectionFactory = $collectionFactory;
+        $this->integrateHelperData = $integrateHelperData;
+        $this->customerFactory = $customerFactory;
+        $this->retailHelper = $retailHelper;
         $this->orderErrorCollectionFactory = $orderErrorCollectionFactory;
-        $this->quoteRepository             = $quoteRepository;
-        $this->orderFactory                = $orderFactory;
+        $this->quoteRepository = $quoteRepository;
+        $this->orderFactory = $orderFactory;
         parent::__construct($requestInterface, $dataConfig, $storeManager);
     }
 
@@ -123,10 +124,10 @@ class OrderManagement extends ServiceAbstract
 
             /** @var \Magento\Sales\Model\Order $order */
             foreach ($collection as $order) {
-                $order         = $this->orderFactory->create()->loadByIncrementId($order->getIncrementId());
+                $order = $this->orderFactory->create()->loadByIncrementId($order->getIncrementId());
 
                 $customerPhone = "";
-                $xOrder        = new XOrder($order->getData());
+                $xOrder = new XOrder($order->getData());
                 $xOrder->setData('created_at', $this->retailHelper->convertTimeDBUsingTimeZone($order->getCreatedAt(), $storeId));
                 $xOrder->setData('status', $order->getStatusLabel());
                 if ($order->getCustomerId()) {
@@ -157,24 +158,24 @@ class OrderManagement extends ServiceAbstract
                     $customerShippingAdd = new CustomerAddress($shippingAdd->getData());
                     $xOrder->setData('shipping_address', $customerShippingAdd);
                 }
-                if ($order->getShippingMethod() === 'smstorepickup_smstorepickup' && is_null($order->getData('retail_status'))) {
-                    if (!$order->hasCreditmemos()) {
-                        if ($order->canInvoice()) {
-                            $xOrder->setData('retail_status', \SM\Sales\Repositories\OrderManagement::RETAIL_ORDER_PARTIALLY_PAID_AWAIT_PICKING);
-                        } elseif ($order->canShip()) {
-                            $xOrder->setData('retail_status', \SM\Sales\Repositories\OrderManagement::RETAIL_ORDER_COMPLETE_AWAIT_PICKING);
-                        }
-                    } else {
-                        if ($order->getState() == \Magento\Sales\Model\Order::STATE_CLOSED) {
-                            $xOrder->setData('retail_status', \SM\Sales\Repositories\OrderManagement::RETAIL_ORDER_FULLY_REFUND);
-                        } else {
-                            if ($order->canShip()) {
-                                $xOrder->setData('retail_status', \SM\Sales\Repositories\OrderManagement::RETAIL_ORDER_PARTIALLY_REFUND_AWAIT_PICKING);
-                            }
-                        }
-                    }
-                }
-                if ($order->getPayment()->getMethod() == \SM\Payment\Model\RetailMultiple::PAYMENT_METHOD_RETAILMULTIPLE_CODE) {
+//                if ($order->getShippingMethod() === RetailStorePickUp::METHOD && !$order->getData('retail_status')) {
+//                    if (!$order->hasCreditmemos()) {
+//                        if ($order->canInvoice()) {
+//                            $xOrder->setData('retail_status', \SM\Sales\Repositories\OrderManagement::RETAIL_ORDER_PARTIALLY_PAID_AWAIT_PICKING);
+//                        } elseif ($order->canShip()) {
+//                            $xOrder->setData('retail_status', \SM\Sales\Repositories\OrderManagement::RETAIL_ORDER_COMPLETE_AWAIT_PICKING);
+//                        }
+//                    } else {
+//                        if ($order->getState() === \Magento\Sales\Model\Order::STATE_CLOSED) {
+//                            $xOrder->setData('retail_status', \SM\Sales\Repositories\OrderManagement::RETAIL_ORDER_FULLY_REFUND);
+//                        } else {
+//                            if ($order->canShip()) {
+//                                $xOrder->setData('retail_status', \SM\Sales\Repositories\OrderManagement::RETAIL_ORDER_PARTIALLY_REFUND_AWAIT_PICKING);
+//                            }
+//                        }
+//                    }
+//                }
+                if ($order->getPayment()->getMethod() === \SM\Payment\Model\RetailMultiple::PAYMENT_METHOD_RETAILMULTIPLE_CODE) {
                     $paymentData = json_decode($order->getPayment()->getAdditionalInformation('split_data'), true);
                     if (is_array($paymentData)) {
                         $paymentData = array_filter(
@@ -192,8 +193,8 @@ class OrderManagement extends ServiceAbstract
                             [
                                 'title'      => $order->getPayment()->getMethodInstance()->getTitle(),
                                 'amount'     => $order->getTotalPaid(),
-                                'created_at' => $order->getCreatedAt()
-                            ]
+                                'created_at' => $order->getCreatedAt(),
+                            ],
                         ]
                     );
                 }
@@ -211,15 +212,15 @@ class OrderManagement extends ServiceAbstract
                     'tax'                          => floatval($order->getTaxAmount()),
                     'discount'                     => floatval($order->getDiscountAmount()),
                     'coupon_code'                  => $order->getData('coupon_code'),
-                    'retail_discount_per_item'    => floatval($order->getData('discount_per_item')),
+                    'retail_discount_per_item'     => floatval($order->getData('discount_per_item')),
                     'grand_total'                  => floatval($order->getGrandTotal()),
                     'total_paid'                   => floatval($order->getTotalPaid()),
                     'total_refunded'               => floatval($order->getTotalRefunded()),
                     'reward_point_discount_amount' => null,
-                    'reward_points_used'         => null,
+                    'reward_points_used'           => null,
                     'gift_card_discount_amount'    => null,
-                    'reward_points_refund'    => null,
-                    'reward_points_refund_amount'    => null,
+                    'reward_points_refund'         => null,
+                    'reward_points_refund_amount'  => null,
                 ];
 
                 if ($this->integrateHelperData->isIntegrateRP()) {
@@ -229,9 +230,7 @@ class OrderManagement extends ServiceAbstract
                     $totals['reward_points_refund_amount'] = $order->getData('aw_reward_points_refund');
                 }
 
-                if (($this->integrateHelperData->isIntegrateGC() ||
-                     ($this->integrateHelperData->isIntegrateGCInPWA() && $order->getData('is_pwa') === '1')) &&
-                     $this->integrateHelperData->isAHWGiftCardExist()) {
+                if (($this->integrateHelperData->isIntegrateGC() || ($this->integrateHelperData->isIntegrateGCInPWA() && $order->getData('is_pwa') === '1')) && $this->integrateHelperData->isAHWGiftCardExist()) {
                     $orderGiftCards = [];
                     if ($order->getExtensionAttributes()) {
                         $orderGiftCards = $order->getExtensionAttributes()->getAwGiftcardCodes();
@@ -242,9 +241,9 @@ class OrderManagement extends ServiceAbstract
                             array_push(
                                 $totals['gift_card'],
                                 [
-                                    'gift_code'   => $giftcard->getGiftcardCode(),
-                                    'giftcard_amount' => floatval(abs($giftcard->getGiftcardAmount())),
-                                    'base_giftcard_amount' => floatval(abs($giftcard->getBaseGiftcardAmount()))
+                                    'gift_code'            => $giftcard->getGiftcardCode(),
+                                    'giftcard_amount'      => floatval(abs($giftcard->getGiftcardAmount())),
+                                    'base_giftcard_amount' => floatval(abs($giftcard->getBaseGiftcardAmount())),
                                 ]
                             );
                         }
@@ -263,9 +262,9 @@ class OrderManagement extends ServiceAbstract
                             array_push(
                                 $totals['gift_card'],
                                 [
-                                    'gift_code'   => $giftCard['c'],
-                                    'giftcard_amount' => floatval(abs($giftCard['a'])),
-                                    'base_giftcard_amount' => floatval(abs($giftCard['ba']))
+                                    'gift_code'            => $giftCard['c'],
+                                    'giftcard_amount'      => floatval(abs($giftCard['a'])),
+                                    'base_giftcard_amount' => floatval(abs($giftCard['ba'])),
                                 ]
                             );
                         }
@@ -297,7 +296,6 @@ class OrderManagement extends ServiceAbstract
      */
     protected function getOrderCollection(DataObject $searchCriteria)
     {
-
         /** @var  \Magento\Sales\Model\ResourceModel\Order\Collection $collection */
         $collection = $this->orderCollectionFactory->create();
 
@@ -315,7 +313,7 @@ class OrderManagement extends ServiceAbstract
                 $collection->addFieldToFilter('entity_id', ["in" => explode(',', $searchCriteria->getData('orderId'))]);
             } else {
                 $collection->getSelect()
-                ->where('customer_id = ?', $customerId);
+                    ->where('customer_id = ?', $customerId);
             }
         }
 
@@ -359,7 +357,7 @@ class OrderManagement extends ServiceAbstract
     protected function getOrderErrorCollection(DataObject $searchCriteria)
     {
         $collection = $this->orderErrorCollectionFactory->create();
-        $storeId    = $searchCriteria->getData('storeId');
+        $storeId = $searchCriteria->getData('storeId');
         if (is_null($storeId)) {
             throw new \Exception("Please define storeId when pull order");
         }
@@ -372,7 +370,7 @@ class OrderManagement extends ServiceAbstract
         }
         if ($dateTo = $searchCriteria->getData('dateTo')) {
             $collection->getSelect()
-                ->where('created_at <= ?', $dateTo . ' 23:59:59');
+                ->where('created_at <= ?', $dateTo.' 23:59:59');
         }
 
         return $collection;
