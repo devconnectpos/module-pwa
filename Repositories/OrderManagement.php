@@ -230,7 +230,7 @@ class OrderManagement extends ServiceAbstract
                     $totals['reward_points_refund_amount'] = $order->getData('aw_reward_points_refund');
                 }
 
-                if (($this->integrateHelperData->isIntegrateGC() || ($this->integrateHelperData->isIntegrateGCInPWA() && $order->getData('is_pwa') === '1')) && $this->integrateHelperData->isAHWGiftCardExist()) {
+                if ($this->integrateHelperData->isAHWGiftCardExist() && ($this->integrateHelperData->isIntegrateGC() || ($this->integrateHelperData->isIntegrateGCInPWA() && $order->getData('is_pwa') === '1'))) {
                     $orderGiftCards = [];
                     if ($order->getExtensionAttributes()) {
                         $orderGiftCards = $order->getExtensionAttributes()->getAwGiftcardCodes();
@@ -238,14 +238,11 @@ class OrderManagement extends ServiceAbstract
                     if (is_array($orderGiftCards) && count($orderGiftCards) > 0) {
                         $totals['gift_card'] = [];
                         foreach ($orderGiftCards as $giftcard) {
-                            array_push(
-                                $totals['gift_card'],
-                                [
-                                    'gift_code'            => $giftcard->getGiftcardCode(),
-                                    'giftcard_amount'      => floatval(abs($giftcard->getGiftcardAmount())),
-                                    'base_giftcard_amount' => floatval(abs($giftcard->getBaseGiftcardAmount())),
-                                ]
-                            );
+                            $totals['gift_card'][] = [
+                                'gift_code'            => $giftcard->getGiftcardCode(),
+                                'giftcard_amount'      => floatval(abs($giftcard->getGiftcardAmount())),
+                                'base_giftcard_amount' => floatval(abs($giftcard->getBaseGiftcardAmount())),
+                            ];
                         }
                     }
 
@@ -259,14 +256,11 @@ class OrderManagement extends ServiceAbstract
                     if (is_array($orderGiftCards) && count($orderGiftCards) > 0) {
                         $totals['gift_card'] = [];
                         foreach ($orderGiftCards as $giftCard) {
-                            array_push(
-                                $totals['gift_card'],
-                                [
-                                    'gift_code'            => $giftCard['c'],
-                                    'giftcard_amount'      => floatval(abs($giftCard['a'])),
-                                    'base_giftcard_amount' => floatval(abs($giftCard['ba'])),
-                                ]
-                            );
+                            $totals['gift_card'][] = [
+                                'gift_code'            => $giftCard['c'],
+                                'giftcard_amount'      => floatval(abs($giftCard['a'])),
+                                'base_giftcard_amount' => floatval(abs($giftCard['ba'])),
+                            ];
                         }
                     }
 
@@ -317,11 +311,6 @@ class OrderManagement extends ServiceAbstract
             }
         }
 
-        // if ($is_pwa = $searchCriteria->getData('is_pwa')) {
-        //     $collection->getSelect()
-        //         ->where('is_pwa = ?', ($is_pwa) ? 1 : 0);
-        // }
-
         if ($storeId = $searchCriteria->getData('storeId')) {
             $collection->getSelect()
                 ->where('store_id = ?', $storeId);
@@ -335,8 +324,7 @@ class OrderManagement extends ServiceAbstract
         $collection = $this->getOrderErrorCollection($searchCriteria);
 
         $orders = [];
-        if (1 < $searchCriteria->getData('currentPage')) {
-        } else {
+        if ($searchCriteria->getData('currentPage') == 1) {
             foreach ($collection as $order) {
                 $orderData = json_decode($order['order_offline'], true);
                 if (is_array($orderData)) {
@@ -403,11 +391,11 @@ class OrderManagement extends ServiceAbstract
             }
 
             $children = [];
-            if ($item->getChildrenItems() && $item->getProductType() == 'bundle') {
+            if ($item->getChildrenItems() && $item->getProductType() === 'bundle') {
                 foreach ($item->getChildrenItems() as $childrenItem) {
                     $_child = new XOrder\XOrderItem($childrenItem->getData());
                     if (is_null($childrenItem->getProduct()->getImage())
-                        || $childrenItem->getProduct()->getImage() == 'no_selection'
+                        || $childrenItem->getProduct()->getImage() === 'no_selection'
                         || !$childrenItem->getProduct()->getImage()
                     ) {
                         $_child->setData('origin_image', null);
@@ -416,7 +404,6 @@ class OrderManagement extends ServiceAbstract
                     }
                     $children[] = $_child->getOutput();
                 }
-            } else {
             }
 
             $_item->setData('children', $children);
