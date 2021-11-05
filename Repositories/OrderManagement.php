@@ -158,23 +158,7 @@ class OrderManagement extends ServiceAbstract
                     $customerShippingAdd = new CustomerAddress($shippingAdd->getData());
                     $xOrder->setData('shipping_address', $customerShippingAdd);
                 }
-//                if ($order->getShippingMethod() === RetailStorePickUp::METHOD && !$order->getData('retail_status')) {
-//                    if (!$order->hasCreditmemos()) {
-//                        if ($order->canInvoice()) {
-//                            $xOrder->setData('retail_status', \SM\Sales\Repositories\OrderManagement::RETAIL_ORDER_PARTIALLY_PAID_AWAIT_PICKING);
-//                        } elseif ($order->canShip()) {
-//                            $xOrder->setData('retail_status', \SM\Sales\Repositories\OrderManagement::RETAIL_ORDER_COMPLETE_AWAIT_PICKING);
-//                        }
-//                    } else {
-//                        if ($order->getState() === \Magento\Sales\Model\Order::STATE_CLOSED) {
-//                            $xOrder->setData('retail_status', \SM\Sales\Repositories\OrderManagement::RETAIL_ORDER_FULLY_REFUND);
-//                        } else {
-//                            if ($order->canShip()) {
-//                                $xOrder->setData('retail_status', \SM\Sales\Repositories\OrderManagement::RETAIL_ORDER_PARTIALLY_REFUND_AWAIT_PICKING);
-//                            }
-//                        }
-//                    }
-//                }
+
                 if ($order->getPayment()->getMethod() === \SM\Payment\Model\RetailMultiple::PAYMENT_METHOD_RETAILMULTIPLE_CODE) {
                     $paymentData = json_decode($order->getPayment()->getAdditionalInformation('split_data'), true);
                     if (is_array($paymentData)) {
@@ -265,6 +249,10 @@ class OrderManagement extends ServiceAbstract
                     }
 
                     $totals['gift_card_discount_amount'] = -$order->getData('aw_giftcard_amount');
+                }
+
+                if ($this->integrateHelperData->isUsingAmastyGiftCard()) {
+                    $totals['gift_card_discount_amount'] = -$order->getData('am_giftcard_amount');
                 }
 
                 $xOrder->setData('totals', $totals);
