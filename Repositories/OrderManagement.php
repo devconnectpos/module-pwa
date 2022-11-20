@@ -160,7 +160,7 @@ class OrderManagement extends ServiceAbstract
                 }
 
                 if ($order->getPayment()->getMethod() === \SM\Payment\Model\RetailMultiple::PAYMENT_METHOD_RETAILMULTIPLE_CODE) {
-                    $paymentData = json_decode($order->getPayment()->getAdditionalInformation('split_data'), true);
+                    $paymentData = json_decode((string)$order->getPayment()->getAdditionalInformation('split_data'), true);
                     if (is_array($paymentData)) {
                         $paymentData = array_filter(
                             $paymentData,
@@ -283,16 +283,16 @@ class OrderManagement extends ServiceAbstract
 
         $collection
             ->setOrder('entity_id')
-            ->setCurPage(is_nan($searchCriteria->getData('currentPage')) ? 1 : $searchCriteria->getData('currentPage'))
+            ->setCurPage(is_nan((float)$searchCriteria->getData('currentPage')) ? 1 : $searchCriteria->getData('currentPage'))
             ->setPageSize(
-                is_nan($searchCriteria->getData('pageSize')) ? DataConfig::PAGE_SIZE_LOAD_DATA : $searchCriteria->getData('pageSize')
+                is_nan((float)$searchCriteria->getData('pageSize')) ? DataConfig::PAGE_SIZE_LOAD_DATA : $searchCriteria->getData('pageSize')
             );
 
         // $collection->addFieldToFilter('status', ["neq" => 'complete']);
 
         if ($customerId = $searchCriteria->getData('customerId')) {
             if ($customerId === 'guest' && $searchCriteria->getData('orderId')) {
-                $collection->addFieldToFilter('entity_id', ["in" => explode(',', $searchCriteria->getData('orderId'))]);
+                $collection->addFieldToFilter('entity_id', ["in" => explode(',', (string)$searchCriteria->getData('orderId'))]);
             } else {
                 $collection->getSelect()
                     ->where('customer_id = ?', $customerId);
@@ -314,7 +314,7 @@ class OrderManagement extends ServiceAbstract
         $orders = [];
         if ($searchCriteria->getData('currentPage') == 1) {
             foreach ($collection as $order) {
-                $orderData = json_decode($order['order_offline'], true);
+                $orderData = json_decode((string)$order['order_offline'], true);
                 if (is_array($orderData)) {
                     if (isset($orderData['id'])) {
                         unset($orderData['id']);
